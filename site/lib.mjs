@@ -53,3 +53,26 @@ export function validarSlugsUnicos(recursos) {
   }
   return e;
 }
+
+export function escaparHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function enLinea(texto) {
+  return escaparHtml(texto)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (todo, t, href) =>
+      /^(https?:\/\/|\/|#|\.\/|[^:]+$)/.test(href) ? `<a href="${href}">${t}</a>` : todo);
+}
+
+export function markdownAHtml(md) {
+  const bloques = String(md ?? '').replace(/\r\n/g, '\n').trim().split(/\n{2,}/).filter(Boolean);
+  return bloques.map((b) => {
+    const lineas = b.split('\n');
+    const h = /^(#{1,3})\s+(.+)$/.exec(b);
+    if (h && lineas.length === 1) { const n = h[1].length + 1; return `<h${n}>${enLinea(h[2])}</h${n}>`; }
+    if (lineas.every((l) => /^[-*]\s+/.test(l))) return `<ul>${lineas.map((l) => `<li>${enLinea(l.replace(/^[-*]\s+/, ''))}</li>`).join('')}</ul>`;
+    if (lineas.every((l) => /^\d+\.\s+/.test(l))) return `<ol>${lineas.map((l) => `<li>${enLinea(l.replace(/^\d+\.\s+/, ''))}</li>`).join('')}</ol>`;
+    return `<p>${enLinea(lineas.join(' '))}</p>`;
+  }).join('\n');
+}

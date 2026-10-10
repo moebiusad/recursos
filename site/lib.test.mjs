@@ -90,3 +90,38 @@ test('validarSlugsUnicos detecta repetidos', () => {
   const e = validarSlugsUnicos([{ slug: 'a', carpeta: 'a' }, { slug: 'b', carpeta: 'b' }, { slug: 'a', carpeta: 'a2' }]);
   assert.deepEqual(e, ['slug "a" repetido en recursos/a y recursos/a2']);
 });
+
+// site/lib.test.mjs — añadir al final
+import { markdownAHtml, escaparHtml } from './lib.mjs';
+
+// --- markdown ---
+test('markdownAHtml: párrafos, encabezados, listas, links y negritas', () => {
+  const md = `# Para qué sirve
+
+Un párrafo con **negrita** y un [link](https://ejemplo.com/?a=1&b=2)
+que sigue en la línea siguiente.
+
+- uno
+- dos
+
+1. primero
+2. segundo
+
+## Créditos`;
+  assert.equal(markdownAHtml(md), [
+    '<h2>Para qué sirve</h2>',
+    '<p>Un párrafo con <strong>negrita</strong> y un <a href="https://ejemplo.com/?a=1&amp;b=2">link</a> que sigue en la línea siguiente.</p>',
+    '<ul><li>uno</li><li>dos</li></ul>',
+    '<ol><li>primero</li><li>segundo</li></ol>',
+    '<h3>Créditos</h3>',
+  ].join('\n'));
+});
+
+test('markdownAHtml escapa HTML y no crea links javascript:', () => {
+  assert.equal(markdownAHtml('<b>hola</b> [x](javascript:alert(1))'), '<p>&lt;b&gt;hola&lt;/b&gt; [x](javascript:alert(1))</p>');
+  assert.equal(markdownAHtml(''), '');
+});
+
+test('escaparHtml cubre & < > " \'', () => {
+  assert.equal(escaparHtml(`<a href="x">Tom & Jerry's</a>`), '&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&#39;s&lt;/a&gt;');
+});
