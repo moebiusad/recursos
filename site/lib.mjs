@@ -76,3 +76,21 @@ export function markdownAHtml(md) {
     return `<p>${enLinea(lineas.join(' '))}</p>`;
   }).join('\n');
 }
+
+export const urlRecurso = (slug) => `${SITIO}/r/${slug}/`;
+
+export function urlDescarga(r) {
+  if (r.url) return r.url;
+  return `${SITIO}/r/${r.slug}/${r.archivo.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+export function ordenarPorFecha(recursos) {
+  return [...recursos].sort((a, b) => (a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : a.slug.localeCompare(b.slug)));
+}
+
+export function generarIndice(recursos) {
+  return ordenarPorFecha(recursos).map((r) => ({
+    slug: r.slug, titulo: r.titulo, tipo: r.tipo, descripcion: r.descripcion, fecha: r.fecha,
+    url: urlRecurso(r.slug), descarga: urlDescarga(r),
+  }));
+}

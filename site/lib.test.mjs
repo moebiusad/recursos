@@ -125,3 +125,27 @@ test('markdownAHtml escapa HTML y no crea links javascript:', () => {
 test('escaparHtml cubre & < > " \'', () => {
   assert.equal(escaparHtml(`<a href="x">Tom & Jerry's</a>`), '&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&#39;s&lt;/a&gt;');
 });
+
+// site/lib.test.mjs — añadir al final
+import { generarIndice, ordenarPorFecha } from './lib.mjs';
+
+// --- índice JSON ---
+test('generarIndice ordena por fecha descendente y arma URLs absolutas', () => {
+  const lista = [
+    { ...valido, slug: 'viejo', fecha: '2026-01-01' },
+    { ...valido, slug: 'nuevo', fecha: '2026-10-12', archivo: 'archivos/mi guía.pdf' },
+    { ...valido, slug: 'externo', fecha: '2026-05-05', archivo: undefined, url: 'https://n8n.io/x' },
+  ];
+  const idx = generarIndice(lista);
+  assert.deepEqual(idx.map((r) => r.slug), ['nuevo', 'externo', 'viejo']);
+  assert.deepEqual(Object.keys(idx[0]), ['slug', 'titulo', 'tipo', 'descripcion', 'fecha', 'url', 'descarga']);
+  assert.equal(idx[0].url, 'https://recursos.ialfredo.com.mx/r/nuevo/');
+  assert.equal(idx[0].descarga, 'https://recursos.ialfredo.com.mx/r/nuevo/archivos/mi%20gu%C3%ADa.pdf');
+  assert.equal(idx[1].descarga, 'https://n8n.io/x');
+});
+
+test('ordenarPorFecha desempata por slug y no muta la lista', () => {
+  const lista = [{ slug: 'b', fecha: '2026-01-01' }, { slug: 'a', fecha: '2026-01-01' }];
+  assert.deepEqual(ordenarPorFecha(lista).map((r) => r.slug), ['a', 'b']);
+  assert.equal(lista[0].slug, 'b');
+});
