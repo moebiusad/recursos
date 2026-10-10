@@ -149,3 +149,52 @@ test('ordenarPorFecha desempata por slug y no muta la lista', () => {
   assert.deepEqual(ordenarPorFecha(lista).map((r) => r.slug), ['a', 'b']);
   assert.equal(lista[0].slug, 'b');
 });
+
+// site/lib.test.mjs — añadir al final
+import { renderIndex, renderRecurso, render404, BOTONES } from './lib.mjs';
+
+const base = '<title>{{titulo}}</title><meta property="og:url" content="{{url}}"><meta property="og:type" content="{{og_tipo}}">{{logo}}<main>{{contenido}}</main>{{anio}}';
+
+// --- render ---
+test('renderIndex escapa títulos, pone filtros solo de los tipos presentes y marca data-tipo', () => {
+  const html = renderIndex([{ ...valido, titulo: '<script>alert(1)</script>' }, { ...valido, slug: 'flujo', tipo: 'n8n', url: 'https://x.y', archivo: undefined }], base, { anio: 2026 });
+  assert.ok(html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
+  assert.ok(!html.includes('<script>alert(1)'));
+  assert.ok(html.includes('<a href="#guia">Guía</a>'));
+  assert.ok(html.includes('<a href="#n8n">Flujo n8n</a>'));
+  assert.ok(!html.includes('<a href="#video">'));
+  assert.ok(html.includes('data-tipo="n8n"'));
+  assert.ok(html.includes('<title>Recursos · ialfredo</title>'));
+  assert.ok(html.endsWith('2026'));
+});
+
+test('renderIndex sin recursos muestra el estado vacío', () => {
+  assert.ok(renderIndex([], base).includes('Pronto habrá recursos aquí.'));
+});
+
+test('renderRecurso: OG, botón por tipo, download para archivos, video y bloque de Instagram', () => {
+  const html = renderRecurso({ ...valido, cuerpo: 'Hola **mundo**', video: 'https://www.instagram.com/reel/abc/' }, base);
+  assert.ok(html.includes('<title>Prompt de dirección de arte · Recursos de ialfredo</title>'));
+  assert.ok(html.includes('<meta property="og:url" content="https://recursos.ialfredo.com.mx/r/prompt-arte/">'));
+  assert.ok(html.includes('<meta property="og:type" content="article">'));
+  assert.ok(html.includes(`href="https://recursos.ialfredo.com.mx/r/prompt-arte/archivos/prompt.pdf" download>${BOTONES.guia}</a>`));
+  assert.ok(html.includes('<p>Hola <strong>mundo</strong></p>'));
+  assert.ok(html.includes('href="https://www.instagram.com/reel/abc/"'));
+  assert.ok(html.includes('https://www.instagram.com/_ialfredo_/'));
+});
+
+test('renderRecurso: url externa abre en pestaña nueva y respeta boton personalizado', () => {
+  const html = renderRecurso({ ...valido, archivo: undefined, url: 'https://n8n.io/x', boton: 'Ir a n8n & co' }, base);
+  assert.ok(html.includes('href="https://n8n.io/x" target="_blank" rel="noopener">Ir a n8n &amp; co</a>'));
+  assert.ok(!html.includes('class="video"'));
+});
+
+test('renderRecurso escapa el título en el h1 y en el title', () => {
+  const html = renderRecurso({ ...valido, titulo: 'Tom & "Jerry"' }, base);
+  assert.ok(html.includes('<h1>Tom &amp; &quot;Jerry&quot;</h1>'));
+  assert.ok(html.includes('<title>Tom &amp; &quot;Jerry&quot; · Recursos de ialfredo</title>'));
+});
+
+test('render404 enlaza a la portada', () => {
+  assert.ok(render404(base).includes('<a class="boton grande" href="/">Ir a la portada</a>'));
+});

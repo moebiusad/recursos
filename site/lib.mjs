@@ -94,3 +94,87 @@ export function generarIndice(recursos) {
     url: urlRecurso(r.slug), descarga: urlDescarga(r),
   }));
 }
+
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+export function formatearFecha(iso) {
+  const [a, m, d] = iso.split('-').map(Number);
+  return `${d} ${MESES[m - 1]} ${a}`;
+}
+
+export function aplicarPlantilla(base, vars) {
+  return base.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? '');
+}
+
+const comunes = (opciones) => ({ logo: opciones.logo ?? '', anio: String(opciones.anio ?? new Date().getFullYear()) });
+
+function tarjeta(r) {
+  const href = `/r/${r.slug}/`;
+  return `<li class="tarjeta" data-tipo="${r.tipo}">
+  <span class="tipo">${ETIQUETAS[r.tipo]}</span>
+  <h2><a href="${href}">${escaparHtml(r.titulo)}</a></h2>
+  <p>${escaparHtml(r.descripcion)}</p>
+  <div class="pie"><time datetime="${r.fecha}">${formatearFecha(r.fecha)}</time><a class="boton" href="${href}">Ver recurso</a></div>
+</li>`;
+}
+
+export function renderIndex(recursos, base, opciones = {}) {
+  const lista = ordenarPorFecha(recursos);
+  const tipos = TIPOS.filter((t) => lista.some((r) => r.tipo === t));
+  const filtros = ['<a href="#todos" class="activo">Todos</a>', ...tipos.map((t) => `<a href="#${t}">${ETIQUETAS[t]}</a>`)].join('\n    ');
+  const anclas = ['todos', ...tipos].map((t) => `<span class="ancla" id="${t}"></span>`).join('');
+  const contenido = `<section class="intro">
+  <h1>Recursos gratis de mis videos</h1>
+  <p>Guías, herramientas, proyectos y flujos que regalo en <a href="${INSTAGRAM}">@_ialfredo_</a>. Toma lo que necesites.</p>
+</section>
+<nav class="filtros" aria-label="Filtrar por tipo">
+    ${filtros}
+</nav>
+${anclas}
+${lista.length ? `<ul class="lista">\n${lista.map(tarjeta).join('\n')}\n</ul>` : '<p class="vacio">Pronto habrá recursos aquí.</p>'}
+<script>
+const marcar = () => { const t = location.hash.slice(1) || 'todos'; document.querySelectorAll('.filtros a').forEach((a) => a.classList.toggle('activo', a.getAttribute('href') === '#' + t)); };
+addEventListener('hashchange', marcar); marcar();
+</script>`;
+  return aplicarPlantilla(base, {
+    ...comunes(opciones),
+    titulo: 'Recursos · ialfredo',
+    descripcion: 'Guías, herramientas, proyectos y flujos gratis que Alfredo regala en sus videos.',
+    url: `${SITIO}/`, og_tipo: 'website', contenido,
+  });
+}
+
+export function renderRecurso(r, base, opciones = {}) {
+  const descarga = urlDescarga(r);
+  const boton = r.boton || BOTONES[r.tipo];
+  const atributos = r.url ? 'target="_blank" rel="noopener"' : 'download';
+  const contenido = `<article class="recurso">
+  <a class="volver" href="/">← Todos los recursos</a>
+  <span class="tipo">${ETIQUETAS[r.tipo]}</span>
+  <h1>${escaparHtml(r.titulo)}</h1>
+  <p class="meta"><time datetime="${r.fecha}">${formatearFecha(r.fecha)}</time></p>
+  <p class="lead">${escaparHtml(r.descripcion)}</p>
+  <a class="boton grande" href="${escaparHtml(descarga)}" ${atributos}>${escaparHtml(boton)}</a>
+  <div class="cuerpo">${markdownAHtml(r.cuerpo)}</div>
+  ${r.video ? `<p class="video">Lo regalé en <a href="${escaparHtml(r.video)}" target="_blank" rel="noopener">este video</a>.</p>` : ''}
+</article>
+<aside class="sigueme">
+  <h2>¿Quieres más?</h2>
+  <p>Sígueme en <a href="${INSTAGRAM}">@_ialfredo_</a>: ahí regalo recursos como este cada semana.</p>
+  <a class="boton" href="${INSTAGRAM}" target="_blank" rel="noopener">Seguir en Instagram</a>
+</aside>`;
+  return aplicarPlantilla(base, {
+    ...comunes(opciones),
+    titulo: `${escaparHtml(r.titulo)} · Recursos de ialfredo`,
+    descripcion: escaparHtml(r.descripcion),
+    url: urlRecurso(r.slug), og_tipo: 'article', contenido,
+  });
+}
+
+export function render404(base, opciones = {}) {
+  const contenido = `<section class="recurso">
+  <h1>Esa página no existe</h1>
+  <p class="lead">Quizá el recurso cambió de nombre o el link llegó incompleto.</p>
+  <a class="boton grande" href="/">Ir a la portada</a>
+</section>`;
+  return aplicarPlantilla(base, { ...comunes(opciones), titulo: 'Página no encontrada · Recursos de ialfredo', descripcion: 'Esa página no existe.', url: `${SITIO}/404.html`, og_tipo: 'website', contenido });
+}
