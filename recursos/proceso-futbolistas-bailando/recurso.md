@@ -4,8 +4,8 @@ slug: proceso-futbolistas-bailando
 tipo: guia
 descripcion: Mi proceso para el video de 200 mil vistas: CapCut + Seedance 2.5, un video de referencia y hojas de personaje.
 fecha: 2026-10-13
-url: https://www.capcut.com
-boton: Abrir CapCut
+url: https://moebiusad.gumroad.com/l/baile
+boton: Ver mi proceso
 ---
 ## Qué necesitas
 

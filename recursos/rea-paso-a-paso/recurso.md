@@ -4,8 +4,8 @@ slug: rea-paso-a-paso
 tipo: guia
 descripcion: Cómo conectar REA a tu agente de IA para entender cómo está hecha cualquier app y armar tu propia versión.
 fecha: 2026-10-14
-url: https://rea.tools
-boton: Ver REA
+url: https://moebiusad.gumroad.com/l/rea-paso-a-paso
+boton: Quiero el paso a paso
 ---
 ## Qué es REA
 
