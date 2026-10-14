@@ -117,6 +117,17 @@ function tarjeta(r) {
 </li>`;
 }
 
+// Links de todas las bios (regla de Alfredo 2026-10-14): las bios de TikTok, X y Threads apuntan a esta página,
+// así que aquí van también los links que antes vivían en esas bios.
+export const MIS_LINKS = [
+  ['Mi página', 'https://ialfredo.com.mx'],
+  ['Skool', 'https://www.skool.com/signup?ref=7cf1b1d66aca4f59bc308c121d23acfc'],
+  ['Instagram', 'https://www.instagram.com/_ialfredo_/'],
+  ['TikTok', 'https://www.tiktok.com/@tu_papa_alfredo'],
+  ['X', 'https://x.com/_ialfredo_'],
+  ['Threads', 'https://www.threads.com/@_ialfredo_'],
+];
+
 export function renderIndex(recursos, base, opciones = {}) {
   const lista = ordenarPorFecha(recursos);
   const tipos = TIPOS.filter((t) => lista.some((r) => r.tipo === t));
@@ -124,7 +135,10 @@ export function renderIndex(recursos, base, opciones = {}) {
   const anclas = ['todos', ...tipos].map((t) => `<span class="ancla" id="${t}"></span>`).join('');
   const contenido = `<section class="intro">
   <h1>Recursos gratis de mis videos</h1>
-  <p>Guías, herramientas, proyectos y flujos que regalo en <a href="${INSTAGRAM}">@_ialfredo_</a>. Toma lo que necesites.</p>
+  <p>Guías, herramientas, proyectos y flujos que regalo en mis videos. Toma lo que necesites.</p>
+  <nav class="mis-links" aria-label="Mis links">
+    ${MIS_LINKS.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join('\n    ')}
+  </nav>
 </section>
 <nav class="filtros" aria-label="Filtrar por tipo">
     ${filtros}

@@ -151,7 +151,7 @@ test('ordenarPorFecha desempata por slug y no muta la lista', () => {
 });
 
 // site/lib.test.mjs — añadir al final
-import { renderIndex, renderRecurso, render404, BOTONES } from './lib.mjs';
+import { renderIndex, renderRecurso, render404, BOTONES, MIS_LINKS } from './lib.mjs';
 
 const base = '<title>{{titulo}}</title><meta property="og:url" content="{{url}}"><meta property="og:type" content="{{og_tipo}}">{{logo}}<main>{{contenido}}</main>{{anio}}';
 
@@ -197,4 +197,9 @@ test('renderRecurso escapa el título en el h1 y en el title', () => {
 
 test('render404 enlaza a la portada', () => {
   assert.ok(render404(base).includes('<a class="boton grande" href="/">Ir a la portada</a>'));
+});
+
+test('renderIndex muestra los links de las bios (página, Skool y redes)', () => {
+  const html = renderIndex([], base);
+  for (const [, u] of MIS_LINKS) assert.ok(html.includes(`href="${u}"`), u);
 });

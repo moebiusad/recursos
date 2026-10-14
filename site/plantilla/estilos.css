@@ -118,3 +118,8 @@ p { margin: 0 0 1rem; }
 
 @keyframes aparecer { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* links de las bios */
+.mis-links { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.mis-links a { padding: .45rem .9rem; border: 1px solid var(--borde); border-radius: 999px; font-size: .9rem; color: var(--texto); text-decoration: none; }
+.mis-links a:hover { border-color: currentColor; }
