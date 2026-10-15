@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '7 * * * *'   # cada hora: refresca el panel de publicaciones
 
 permissions:
   contents: read
@@ -24,6 +26,8 @@ jobs:
           node-version: 22
       - run: npm test
       - run: node site/build.mjs
+        env:
+          UPLOAD_POST_API_KEY: ${{ secrets.UPLOAD_POST_API_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

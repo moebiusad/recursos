@@ -51,3 +51,10 @@ if (hayLogo) copyFileSync(join(plantilla, 'logo.svg'), join(dist, 'logo.svg'));
 if (existsSync(join(raiz, 'CNAME'))) copyFileSync(join(raiz, 'CNAME'), join(dist, 'CNAME'));
 writeFileSync(join(dist, '.nojekyll'), '');
 console.log(`OK: ${recursos.length} recurso(s) en ${dist}`);
+// Panel privado de publicaciones (dist/panel/): se genera aparte y nunca rompe el sitio si falla.
+try {
+  const { execFileSync } = await import('node:child_process');
+  execFileSync(process.execPath, [join(aqui, 'panel.mjs'), raiz], { stdio: 'inherit' });
+} catch (e) {
+  console.error('panel: no se generó (' + (e.message || e) + ')');
+}
